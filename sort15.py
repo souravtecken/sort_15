@@ -6,7 +6,7 @@ bgCOLOR = "WHITE"
 timerWidth=30
 gapWidth=5
 tileWidth=70
-gridSize=5
+gridSize=4
 animationSpeed=5
 
 class TILE:
@@ -93,20 +93,47 @@ def moveTiles(tiles,fTile,lTile):
                     r.draw(win)
                     tiles[i][j].x-=speed
                     tiles[i][j].drawTile()
+        else:
+            while not tiles[i][lTile[2]-1].x==lTile[0].x:
+                speed=animationSpeed
+                if(lTile[0].x - tiles[i][lTile[2]-1].x<animationSpeed):
+                    speed=lTile[0].x-tiles[i][lTile[2]+-1].x
+                for j in range(fTile[2],lTile[2]):
+                    r=Rectangle(Point(tiles[i][j].x-tileWidth/2,tiles[i][j].y-tileWidth/2),Point(tiles[i][j].x+tileWidth/2,tiles[i][j].y+tileWidth/2))
+                    r.setFill("white")
+                    r.setWidth(0)
+                    r.draw(win)
+                    tiles[i][j].x+=speed
+                    tiles[i][j].drawTile()
+    else:
+        j=fTile[2]
+        if fTile[1]>lTile[1]:
+            while not tiles[lTile[1]+1][j].y==lTile[0].y:
+                speed=animationSpeed
+                if(tiles[lTile[1]+1][j].y-lTile[0].y<animationSpeed):
+                    speed=tiles[lTile[1]+1][j].y-lTile[0].y
+                for i in range(lTile[1]+1,fTile[1]+1):
+                    r=Rectangle(Point(tiles[i][j].x-tileWidth/2,tiles[i][j].y-tileWidth/2),Point(tiles[i][j].x+tileWidth/2,tiles[i][j].y+tileWidth/2))
+                    r.setFill("white")
+                    r.setWidth(0)
+                    r.draw(win)
+                    tiles[i][j].y-=speed
+                    tiles[i][j].drawTile()
+        else:
+            while not tiles[lTile[1]-1][j].y==lTile[0].y:
+                speed=animationSpeed
+                if(lTile[0].y-tiles[lTile[1]-1][j].y<animationSpeed):
+                    speed=lTile[0].y-tiles[lTile[1]-1][j].y
+                for i in range(fTile[1],lTile[1]):
+                    r=Rectangle(Point(tiles[i][j].x-tileWidth/2,tiles[i][j].y-tileWidth/2),Point(tiles[i][j].x+tileWidth/2,tiles[i][j].y+tileWidth/2))
+                    r.setFill("white")
+                    r.setWidth(0)
+                    r.draw(win)
+                    tiles[i][j].y+=speed
+                    tiles[i][j].drawTile()
         
-    
-    
-    
-    
     lTile[0].x,lTile[0].y=firstTileCoordinates
 
-
-
-
-
-
-    if fTile[2]==lTile[2]:
-        pass
 
 def sortTilesInGrid(tiles):
     # Sort each row according to their x-coordinates
@@ -116,7 +143,15 @@ def sortTilesInGrid(tiles):
         tiles[i]=gridRow        
 
     # Sort each columns according to their y-coordinates
-    
+    for j in range(gridSize):
+        gridColumn=[]
+        for i in range(gridSize):
+            gridColumn.append(tiles[i][j])
+        gridColumn=sorted(gridColumn,key=lambda tile:tile.y)
+
+        for i in range(gridSize):
+            tiles[i][j]=gridColumn[i]
+
 
 def play(tiles):
     while True:
@@ -128,6 +163,7 @@ def play(tiles):
         if tileCanMove:
             moveTiles(tiles,tileClicked,tileCanMove)
             sortTilesInGrid(tiles)
+            
 
         
             
