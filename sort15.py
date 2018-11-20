@@ -1,3 +1,5 @@
+# By Chirag Srinivas, Mihir Patil and Sourav Raveendran
+
 import image
 from graphics import *
 import random

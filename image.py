@@ -1,3 +1,4 @@
+# By Chirag Srinivas, Mihir Patil and Sourav Raveendran
 from graphics import *
 from PIL import Image as im
 
