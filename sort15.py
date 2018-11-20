@@ -12,7 +12,7 @@ animationSpeed=5
 class TILE:
     def __init__(self,x=0,y=0,value=0):
         self.x=x
-        self.y=y
+        self.y=y    
         self.val=value
 
 
@@ -155,34 +155,51 @@ def sortTilesInGrid(tiles):
 def checkCompletion(tiles):
     for i in range(gridSize):
         for j in range(gridSize):
-            if(tiles[i][j]!=gridSize*i+j):
+            # If the tile value doesn't correspond to the numeric order and the tile being checked is not the last tile.
+            if(tiles[i][j].val!=gridSize*i+j+1 and not i+j==(gridSize-1)*2):
                 return False
     return True
 
+def checkSolvability(tiles):
+    n=numberOfInversions(tiles)
+    zeroPosition=0
+    for i in range(len(tiles)):
+        numbersInRow=list(map(lambda tile:tile.val,tiles[i]))
+        if 0 in numbersInRow:
+            zeroPosition=gridSize-i # The zero position is checked from bottom row, row 1 being the last row
+            break
+
+    if gridSize%2: # if grid size is odd
+        if not n%2: # if number of inversions is even
+            return True # Solvable
+    else:   # if grid size is even
+        if not zeroPosition%2: # if zero is in an even row
+            if n%2: # if number of inversions is odd
+                return True # Solvable
+        else: # if zero is in an odd row
+            if not n%2: # if number of inversions is even
+                return True # Solvable
+    return False # if all above are false, the given state is not solvable
+    
 
 def play(tiles):
-    while True:
-        print(numberOfInversions(tiles))
+    while not checkCompletion(tiles):
         mouseClick=win.getMouse()
         tileClicked=checkIfTileClicked(tiles,mouseClick)
         tileCanMove=False
-        
         if tileClicked:
             tileCanMove=checkTilesMove(tiles,tileClicked)
         if tileCanMove:
             moveTiles(tiles,tileClicked,tileCanMove)
             sortTilesInGrid(tiles)
-        if(checkCompletion(tiles)):
-            print("Yay")
+
        
 
 def numberOfInversions(tiles):      
     gridNumbers=list()
-    
-
     for i in range(gridSize):
         for j in range(gridSize):
-            if(tiles[i][j]):
+            if(tiles[i][j].val):
                 gridNumbers.append(tiles[i][j].val)
     n=0 # Number of inversions
     for i in range(len(gridNumbers)):
@@ -199,6 +216,8 @@ def main():
     # Create a 2D list of tiles, assigning the appropriate midpoints and initial ordered values.
     tiles=[[TILE(gapWidth*(j+1)+j*tileWidth+tileWidth//2,gapWidth*(i+1)+i*tileWidth+tileWidth/2,i*4+j) for j in range(gridSize)] for i in range(gridSize)]
     initTileValues(tiles)
+    while not checkSolvability(tiles):
+        initTileValues(tiles)
     drawGrid(tiles)
     play(tiles)
     
