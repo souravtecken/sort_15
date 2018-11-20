@@ -4,8 +4,8 @@ import random
 bgCOLOR = "WHITE"
 
 timerWidth=30
-gapWidth=5
-tileWidth=70
+gapWidth=10
+tileWidth=100
 gridSize=4
 animationSpeed=5
 
@@ -152,18 +152,47 @@ def sortTilesInGrid(tiles):
         for i in range(gridSize):
             tiles[i][j]=gridColumn[i]
 
+def checkCompletion(tiles):
+    for i in range(gridSize):
+        for j in range(gridSize):
+            if(tiles[i][j]!=gridSize*i+j):
+                return False
+    return True
+
 
 def play(tiles):
     while True:
+        print(numberOfInversions(tiles))
         mouseClick=win.getMouse()
         tileClicked=checkIfTileClicked(tiles,mouseClick)
         tileCanMove=False
+        
         if tileClicked:
             tileCanMove=checkTilesMove(tiles,tileClicked)
         if tileCanMove:
             moveTiles(tiles,tileClicked,tileCanMove)
             sortTilesInGrid(tiles)
-            
+        if(checkCompletion(tiles)):
+            print("Yay")
+       
+
+def numberOfInversions(tiles):      
+    gridNumbers=list()
+    
+
+    for i in range(gridSize):
+        for j in range(gridSize):
+            if(tiles[i][j]):
+                gridNumbers.append(tiles[i][j].val)
+    n=0 # Number of inversions
+    for i in range(len(gridNumbers)):
+        for j in range(i+1,len(gridNumbers)):
+            if gridNumbers[i]>gridNumbers[j]:
+                n+=1
+
+    return n # n is the variable holding number of inversions
+
+    
 
         
 def main():        
@@ -172,6 +201,7 @@ def main():
     initTileValues(tiles)
     drawGrid(tiles)
     play(tiles)
+    
 
 
 main()
