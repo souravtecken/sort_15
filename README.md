@@ -2,8 +2,19 @@
 A python implementation of the popular grid sorting game.
 
 To run:
-1. Keep the graphics.py and sort_15.py files in the same directory.
-2. Make sure you have tkinter installed.
-3. To intall tkinter:
-    On linux: sudo apt-get install python3-tk
+1. Install tkinter:
+```
+sudo apt-get install python3-tk
+```
+2. Install Pillow (PIL Fork)
+```
+pip install Pillow
+```
+3. Use the graphics.py file within the repository. 
+4. Run sort15.py
 
+
+The graphics.py used is a slightly modified version of the standard graphics library:
+[graphics.py](http://mcsp.wartburg.edu/zelle/python/graphics.py)
+
+Changes made to the Image class to accept an image as a PIL Image object rather than the file name.
