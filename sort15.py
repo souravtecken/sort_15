@@ -1,3 +1,4 @@
+import image
 from graphics import *
 import random
 
@@ -7,13 +8,18 @@ timerWidth=30
 gapWidth=10
 tileWidth=100
 gridSize=4
-animationSpeed=5
+animationSpeed=20
+imageFileName="image.gif"
+# imageGrid stores image objects created in the image.py file
+imageGrid=image.cropImageIntoGrid(imageFileName,gridSize,tileWidth)
+
 
 class TILE:
-    def __init__(self,x=0,y=0,value=0):
+    def __init__(self,x=0,y=0,value=0,img=0):
         self.x=x
         self.y=y    
         self.val=value
+        self.img=img
 
 
     def drawTile(self):
@@ -22,14 +28,16 @@ class TILE:
         r.setWidth(0)
         rText=Text(Point(self.x,self.y),str(self.val))
         rText.setFill("white")
+        img=Image(Point(self.x,self.y),self.img)
         if self.val!=0:
             r.draw(win)
             rText.draw(win)
+            img.draw(win)
 
 
 
 
-win=GraphWin("Sort 15", tileWidth*gridSize+gapWidth*(gridSize+1),tileWidth*gridSize+gapWidth*(gridSize+1))
+win=GraphWin("Sort 15", tileWidth*gridSize+gapWidth*(gridSize+1),tileWidth*gridSize+gapWidth*(gridSize+1),autoflush=False)
 win.setBackground("white")
 
 
@@ -40,8 +48,18 @@ def initTileValues(tiles):
         for j in range(gridSize):
             tiles[i][j].val=random.choice(numbers)
             numbers.remove(tiles[i][j].val)
-    
 
+            tileValue=tiles[i][j].val         #tileValue used to hold the value of the tile for some operations
+            if tileValue==0:                  # Attempting to map the values of the tiles to the corresponding section of the image
+                tileValue=gridSize*gridSize-1 # grid. Number 1 corresponds to the image piece in the first row first, column, so on.
+            else:                             # The tile with value 0 must get the bottom right most piece of the picture. (Because it's not displayed) 
+                tileValue-=1                  
+            ii=tileValue//gridSize           # Based on tileValue, I assign the tile it's corresponding image section.
+            jj=tileValue%gridSize            # This's done by determining the row and column number.
+            tiles[i][j].img=imageGrid[ii][jj] 
+# For example, in a 4*4 grid:
+# Value 1 will be in the first row first column, value 4 will be in the 1st row 4th column.
+# Value 5 will be in the second row, first column, so on...
 def drawGrid(tiles):
     for i in range(gridSize):
         for j in range(gridSize):
@@ -93,6 +111,7 @@ def moveTiles(tiles,fTile,lTile):
                     r.draw(win)
                     tiles[i][j].x-=speed
                     tiles[i][j].drawTile()
+                    update(200)
         else:
             while not tiles[i][lTile[2]-1].x==lTile[0].x:
                 speed=animationSpeed
@@ -105,6 +124,7 @@ def moveTiles(tiles,fTile,lTile):
                     r.draw(win)
                     tiles[i][j].x+=speed
                     tiles[i][j].drawTile()
+                    update(200)
     else:
         j=fTile[2]
         if fTile[1]>lTile[1]:
@@ -119,6 +139,7 @@ def moveTiles(tiles,fTile,lTile):
                     r.draw(win)
                     tiles[i][j].y-=speed
                     tiles[i][j].drawTile()
+                    update(200)
         else:
             while not tiles[lTile[1]-1][j].y==lTile[0].y:
                 speed=animationSpeed
@@ -131,6 +152,7 @@ def moveTiles(tiles,fTile,lTile):
                     r.draw(win)
                     tiles[i][j].y+=speed
                     tiles[i][j].drawTile()
+                    update(200)
         
     lTile[0].x,lTile[0].y=firstTileCoordinates
 
