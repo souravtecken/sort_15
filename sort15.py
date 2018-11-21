@@ -3,6 +3,7 @@
 # Standard Libraries
 import random
 import datetime
+import os
 # Third Party Libraries
 from graphics import *
 from PIL import Image as im
@@ -13,11 +14,11 @@ import image
 # -----------------Global Variables-------------------------
 
 bgCOLOR = "white"
-gapWidth=10
+gapWidth=1
 tileWidth=100
 gridSize=4
 animationSpeed=20
-imageFileName="image.gif"
+imageFileName="image.jpg"
 imageWidth=(tileWidth*gridSize+gapWidth*(gridSize+1))*0.5 # Half of the puzzle width - Size of image being show on the right
 screenWidth=(tileWidth*gridSize+gapWidth*(gridSize+1))*3/2 # 1.5 times the puzzle width 
 screenHeight=tileWidth*gridSize+gapWidth*(gridSize+1)
@@ -36,16 +37,18 @@ class TILE:
 
 
     def drawTile(self):
-        r=Rectangle(Point(self.x-tileWidth//2,self.y-tileWidth//2),Point(self.x+tileWidth//2,self.y+tileWidth//2))    
-        r.setFill("black")
-        r.setWidth(0)
-        rText=Text(Point(self.x,self.y),str(self.val))
-        rText.setFill("white")
-        img=Image(Point(self.x,self.y),self.img)
         if self.val!=0:
+            r=Rectangle(Point(self.x-tileWidth//2,self.y-tileWidth//2),Point(self.x+tileWidth//2,self.y+tileWidth//2))    
+            r.setFill("black")
+            r.setWidth(0)
+            rText=Text(Point(self.x,self.y),str(self.val))
+            rText.setFill("white")
             r.draw(win)
             rText.draw(win)
-            img.draw(win)
+            if imageFileName:
+                img=Image(Point(self.x,self.y),self.img)
+                img.draw(win)
+            
 
 
 # The graphic window - Height and width set according to tile width, gap width and number of tiles.
@@ -58,24 +61,28 @@ win.setBackground("white")
 
 # Function to assign random number values to the tiles, and to assign corresponding image piece to that tile.
 def initTileValues(tiles):
+    global imageFileName
     numbers=list(range(gridSize*gridSize))
+    if not os.path.isfile(imageFileName):
+        imageFileName=""
 
     # imageGrid stores image objects created in the image.py file
-    imageGrid=image.cropImageIntoGrid(imageFileName,gridSize,tileWidth)
+    if imageFileName:
+        imageGrid=image.cropImageIntoGrid(imageFileName,gridSize,tileWidth)
 
     for i in range(gridSize):
         for j in range(gridSize):
             tiles[i][j].val=random.choice(numbers)
             numbers.remove(tiles[i][j].val)
-
-            tileValue=tiles[i][j].val         #tileValue used to hold the value of the tile for some operations
-            if tileValue==0:                  # Attempting to map the values of the tiles to the corresponding section of the image
-                tileValue=gridSize*gridSize-1 # grid. Number 1 corresponds to the image piece in the first row first, column, so on.
-            else:                             # The tile with value 0 must get the bottom right most piece of the picture. (Because it's not displayed) 
-                tileValue-=1                  
-            ii=tileValue//gridSize           # Based on tileValue, I assign the tile its corresponding image section.
-            jj=tileValue%gridSize            # This's done by determining the row and column number.
-            tiles[i][j].img=imageGrid[ii][jj] 
+            if imageFileName:
+                tileValue=tiles[i][j].val         #tileValue used to hold the value of the tile for some operations
+                if tileValue==0:                  # Attempting to map the values of the tiles to the corresponding section of the image
+                    tileValue=gridSize*gridSize-1 # grid. Number 1 corresponds to the image piece in the first row first, column, so on.
+                else:                             # The tile with value 0 must get the bottom right most piece of the picture. (Because it's not displayed) 
+                    tileValue-=1                  
+                ii=tileValue//gridSize           # Based on tileValue, I assign the tile its corresponding image section.
+                jj=tileValue%gridSize            # This's done by determining the row and column number.
+                tiles[i][j].img=imageGrid[ii][jj] 
 # For example, in a 4*4 grid:
 # Value 1 will be in the first row first column, value 4 will be in the 1st row 4th column.
 # Value 5 will be in the second row, first column, so on...
@@ -133,11 +140,12 @@ def checkSolvability(tiles):
 
 # Function to draw the image on the right.
 def createSideBar():
-    img=im.open(imageFileName)
-    
-    img=img.resize((int(imageWidth),int(imageWidth)))
-    winImage=Image(Point(screenWidth-imageWidth/2,screenHeight-imageWidth/2),img)
-    winImage.draw(win)
+    if imageFileName:
+        img=im.open(imageFileName)
+        
+        img=img.resize((int(imageWidth),int(imageWidth)))
+        winImage=Image(Point(screenWidth-imageWidth/2,screenHeight-imageWidth/2),img)
+        winImage.draw(win)
 
 # Function that displays the timer on the right.
 def updateTimer(timeStart):
@@ -295,7 +303,7 @@ def checkCompletion(tiles):
 
 def play():
     # Create a 2D list of tiles, assigning the appropriate midpoints and initial ordered values.
-    tiles=[[TILE(gapWidth*(j+1)+j*tileWidth+tileWidth//2,gapWidth*(i+1)+i*tileWidth+tileWidth/2,i*4+j) for j in range(gridSize)] for i in range(gridSize)]
+    tiles=[[TILE(gapWidth*(j+1)+j*tileWidth+tileWidth//2,gapWidth*(i+1)+i*tileWidth+tileWidth/2,i*gridSize+j) for j in range(gridSize)] for i in range(gridSize)]
     initTileValues(tiles)
     while not checkSolvability(tiles):
         initTileValues(tiles)
