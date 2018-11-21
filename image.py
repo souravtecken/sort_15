@@ -1,7 +1,7 @@
 # By Chirag Srinivas, Mihir Patil and Sourav Raveendran
+
+
 from PIL import Image as im
-
-
 
 # Function to resize given image based on the size of the graphics window.
 # If the image is a 200*200 image, but there are 16 tiles of width 100 each, the image will be resized to a 400*400 image
