@@ -1,10 +1,12 @@
 # By Chirag Srinivas, Mihir Patil and Sourav Raveendran
-
+from multiprocessing import Process
 import image
 from graphics import *
 import random
+import datetime
+from PIL import Image as im
 
-bgCOLOR = "WHITE"
+bgCOLOR = "white"
 
 timerWidth=30
 gapWidth=10
@@ -12,8 +14,15 @@ tileWidth=100
 gridSize=4
 animationSpeed=20
 imageFileName="image.gif"
+imageWidth=(tileWidth*gridSize+gapWidth*(gridSize+1))*0.5 # Half of the puzzle width
+screenWidth=(tileWidth*gridSize+gapWidth*(gridSize+1))*3/2 # 1.5 times the puzzle width
+screenHeight=tileWidth*gridSize+gapWidth*(gridSize+1)
+
 # imageGrid stores image objects created in the image.py file
 imageGrid=image.cropImageIntoGrid(imageFileName,gridSize,tileWidth)
+
+
+
 
 
 class TILE:
@@ -38,14 +47,36 @@ class TILE:
 
 
 
+def createSideBar():
+    img=im.open(imageFileName)
+    
+    img=img.resize((int(imageWidth),int(imageWidth)))
+    winImage=Image(Point(screenWidth-imageWidth/2,screenHeight-imageWidth/2),img)
+    winImage.draw(win)
 
-win=GraphWin("Sort 15", tileWidth*gridSize+gapWidth*(gridSize+1),tileWidth*gridSize+gapWidth*(gridSize+1),autoflush=False)
+
+def updateTimer(timeStart):
+    timeNow=datetime.datetime.now()
+    timeDif=timeNow-timeStart
+    minutes,seconds=divmod(timeDif.seconds,60)
+    timeString=str(minutes)+":"+str(seconds)
+    r=Rectangle(Point(screenWidth-imageWidth,0),Point(screenWidth,imageWidth))
+    r.setFill(bgCOLOR)
+    r.draw(win)
+    timerText=Text(Point(screenWidth-imageWidth/2,imageWidth/2),timeString)
+    timerText.setSize(35)
+    timerText.draw(win)
+    
+
+
+
+win=GraphWin("Sort 15", (tileWidth*gridSize+gapWidth*(gridSize+1))*3/2,tileWidth*gridSize+gapWidth*(gridSize+1),autoflush=False)
 win.setBackground("white")
 
 
 def initTileValues(tiles):
     numbers=list(range(gridSize*gridSize))
-    print(numbers)
+    
     for i in range(gridSize):
         for j in range(gridSize):
             tiles[i][j].val=random.choice(numbers)
@@ -56,13 +87,16 @@ def initTileValues(tiles):
                 tileValue=gridSize*gridSize-1 # grid. Number 1 corresponds to the image piece in the first row first, column, so on.
             else:                             # The tile with value 0 must get the bottom right most piece of the picture. (Because it's not displayed) 
                 tileValue-=1                  
-            ii=tileValue//gridSize           # Based on tileValue, I assign the tile it's corresponding image section.
+            ii=tileValue//gridSize           # Based on tileValue, I assign the tile its corresponding image section.
             jj=tileValue%gridSize            # This's done by determining the row and column number.
             tiles[i][j].img=imageGrid[ii][jj] 
 # For example, in a 4*4 grid:
 # Value 1 will be in the first row first column, value 4 will be in the 1st row 4th column.
 # Value 5 will be in the second row, first column, so on...
 def drawGrid(tiles):
+    r=Rectangle(Point(0,0),Point(screenHeight,screenWidth))
+    r.setFill(bgCOLOR)
+    r.draw(win)
     for i in range(gridSize):
         for j in range(gridSize):
             tiles[i][j].drawTile()
@@ -166,7 +200,7 @@ def sortTilesInGrid(tiles):
         gridRow=sorted(tiles[i],key=lambda tile:tile.x)
         tiles[i]=gridRow        
 
-    # Sort each columns according to their y-coordinates
+    # Sort each column according to their y-coordinates
     for j in range(gridSize):
         gridColumn=[]
         for i in range(gridSize):
@@ -206,16 +240,37 @@ def checkSolvability(tiles):
     return False # if all above are false, the given state is not solvable
     
 
-def play(tiles):
+def play():
+    # Create a 2D list of tiles, assigning the appropriate midpoints and initial ordered values.
+    tiles=[[TILE(gapWidth*(j+1)+j*tileWidth+tileWidth//2,gapWidth*(i+1)+i*tileWidth+tileWidth/2,i*4+j) for j in range(gridSize)] for i in range(gridSize)]
+    initTileValues(tiles)
+    while not checkSolvability(tiles):
+        initTileValues(tiles)
+    drawGrid(tiles)
+    createSideBar()
+    
+    timeStart=0
+    timeEnd=0
+    numberOfClicks=0
+    
     while not checkCompletion(tiles):
-        mouseClick=win.getMouse()
-        tileClicked=checkIfTileClicked(tiles,mouseClick)
+        mouseClick=win.checkMouse()
+        tileClicked=False
+        if mouseClick:
+            tileClicked=checkIfTileClicked(tiles,mouseClick)
         tileCanMove=False
         if tileClicked:
+            numberOfClicks+=1
+            if numberOfClicks==1:
+                timeStart=datetime.datetime.now()
             tileCanMove=checkTilesMove(tiles,tileClicked)
         if tileCanMove:
             moveTiles(tiles,tileClicked,tileCanMove)
             sortTilesInGrid(tiles)
+        if timeStart:
+            updateTimer(timeStart)
+    timeEnd=datetime.datetime.now()
+    return win.getKey()
 
        
 
@@ -236,16 +291,9 @@ def numberOfInversions(tiles):
     
 
         
-def main():        
-    # Create a 2D list of tiles, assigning the appropriate midpoints and initial ordered values.
-    tiles=[[TILE(gapWidth*(j+1)+j*tileWidth+tileWidth//2,gapWidth*(i+1)+i*tileWidth+tileWidth/2,i*4+j) for j in range(gridSize)] for i in range(gridSize)]
-    initTileValues(tiles)
-    while not checkSolvability(tiles):
-        initTileValues(tiles)
-    drawGrid(tiles)
-    play(tiles)
-    
-
+def main():
+    while not play()=="Escape":
+        pass
 
 main()
 
