@@ -18,7 +18,7 @@ gapWidth=1
 tileWidth=100
 gridSize=4
 animationSpeed=20
-imageFileName="image.jpg"
+imageFileName="image.gif"
 imageWidth=(tileWidth*gridSize+gapWidth*(gridSize+1))*0.5 # Half of the puzzle width - Size of image being show on the right
 screenWidth=(tileWidth*gridSize+gapWidth*(gridSize+1))*3/2 # 1.5 times the puzzle width 
 screenHeight=tileWidth*gridSize+gapWidth*(gridSize+1)
@@ -306,6 +306,26 @@ def loadingScreen():
     loadingText.draw(win)
     a=win.checkMouse()
     
+def enterHighScore(score):
+    inputBox=Entry(Point(screenWidth-imageWidth/2,imageWidth*0.75),20)
+    inputBox.setFill("white")
+    inputBox.draw(win)
+    while win.getKey()!="Return":
+        pass
+    userName=inputBox.getText()
+    if userName=="" or userName=="\n":
+        userName="User"
+    inputBox.setTextColor("green")
+    inputBox.setText("Score saved")
+    inputBox.undraw()
+    inputBox.draw(win)
+    f=open("highscore.txt","a")
+    lineLength=50
+    fileLine=userName+(lineLength-len(userName))*" "+str(score)+"\n"
+    f.write(fileLine)
+    inputBox.undraw()
+    f.close()
+
 
 def play():
     # Create a 2D list of tiles, assigning the appropriate midpoints and initial ordered values.
@@ -321,6 +341,7 @@ def play():
     timeStart=0
     timeEnd=0
     numberOfClicks=0
+    
     
     while not checkCompletion(tiles):
         mouseClick=win.checkMouse()
@@ -339,6 +360,8 @@ def play():
         if timeStart:
             updateTimer(timeStart)
     timeEnd=datetime.datetime.now()
+    enterHighScore((timeEnd-timeStart).seconds)
+    
     return win.getKey()
 
        
