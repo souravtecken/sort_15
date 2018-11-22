@@ -23,6 +23,10 @@ imageWidth=(tileWidth*gridSize+gapWidth*(gridSize+1))*0.5 # Half of the puzzle w
 screenWidth=(tileWidth*gridSize+gapWidth*(gridSize+1))*3/2 # 1.5 times the puzzle width 
 screenHeight=tileWidth*gridSize+gapWidth*(gridSize+1)
 
+# The graphic window - Height and width set according to tile width, gap width and number of tiles.
+win=GraphWin("Sort 15", screenWidth,screenHeight,autoflush=False)
+
+
 # ----------------------------------------------------------
 
 
@@ -51,9 +55,7 @@ class TILE:
             
 
 
-# The graphic window - Height and width set according to tile width, gap width and number of tiles.
-win=GraphWin("Sort 15", (tileWidth*gridSize+gapWidth*(gridSize+1))*3/2,tileWidth*gridSize+gapWidth*(gridSize+1),autoflush=False)
-win.setBackground("white")
+
 
 
     
@@ -298,11 +300,17 @@ def checkCompletion(tiles):
     return True
 
 
-
+def loadingScreen():
+    loadingText=Text(Point(screenWidth/2,screenHeight/2),"Loading...")
+    loadingText.setFill("black")
+    loadingText.draw(win)
+    a=win.checkMouse()
     
 
 def play():
     # Create a 2D list of tiles, assigning the appropriate midpoints and initial ordered values.
+    loadingScreen()
+    
     tiles=[[TILE(gapWidth*(j+1)+j*tileWidth+tileWidth//2,gapWidth*(i+1)+i*tileWidth+tileWidth/2,i*gridSize+j) for j in range(gridSize)] for i in range(gridSize)]
     initTileValues(tiles)
     while not checkSolvability(tiles):
