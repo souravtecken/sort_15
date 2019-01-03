@@ -2,7 +2,7 @@
 A python implementation of the popular grid sorting game.
 
 To run:
-1. Install tkinter:
+1. Install tkinter: (For Linux only)
 ```
 sudo apt-get install python3-tk
 ```
