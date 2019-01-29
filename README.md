@@ -1,5 +1,5 @@
 # sort_15
-A python implementation of the popular grid sorting game.
+A python implementation of the popular grid sorting game (Sort 15).
 
 To run:
 1. Install tkinter: (For Linux only)
