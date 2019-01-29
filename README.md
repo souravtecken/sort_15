@@ -14,7 +14,7 @@ pip install Pillow
 4. Run sort15.py
 
 
-The graphics.py used is a slightly modified version of the standard graphics library:
+The graphics.py used is a slightly modified version of the standard graphics library to accomodate PIL objects:
 [graphics.py](http://mcsp.wartburg.edu/zelle/python/graphics.py)
 
 Changes made to the Image class to accept an image as a PIL Image object rather than the file name.
